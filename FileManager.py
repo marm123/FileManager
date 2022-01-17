@@ -22,7 +22,7 @@ class FileManager:
         self.frame_footer.grid(row=3, column=1)
 
         ttk.Label(self.frame_header, text='This script will help you manage files on your computer.').pack(pady=20)
-        ttk.Label(self.frame_footer, text='by Bartosz Marmołowski', font=('Aria', 7)).pack()
+        ttk.Label(self.frame_footer, text='by Bartosz Marmołowski', font=('Arial', 7)).pack()
 
         self.changelog_field = Text(self.frame_changelog, width=50, height=10)
         self.changelog_field.pack(padx=5, pady=5)
