@@ -36,6 +36,7 @@ class FileManager:
         self.changelog_scrollbar = ttk.Scrollbar(self.frame_changelog, command=self.changelog_field.yview)
         self.changelog_scrollbar.grid(row=0, column=2, sticky='nse')
         self.changelog_field['yscrollcommand'] = self.changelog_scrollbar.set
+        self.changelog_field.config(state=DISABLED)
 
         self.copy_file_button = ttk.Button(self.frame_buttons, text='Copy File', command=self.copy_file)
         self.copy_file_button.grid(row=2)
@@ -43,7 +44,7 @@ class FileManager:
         self.delete_file_button.grid(row=3)
         self.rename_file_button = ttk.Button(self.frame_buttons, text='Rename File', command=self.rename_file)
         self.rename_file_button.grid(row=4)
-        self.move_file_button = ttk.Button(self.frame_buttons, text='Move File')
+        self.move_file_button = ttk.Button(self.frame_buttons, text='Move File', command=self.move_file)
         self.move_file_button.grid(row=5)
         self.make_folder_button = ttk.Button(self.frame_buttons, text='Make Folder')
         self.make_folder_button.grid(row=6)
@@ -74,21 +75,23 @@ class FileManager:
             return
         potential_destination = os.path.join(destination_location, copied_file_name)
         if original_location_name == destination_location:
-            messagebox.showerror(title='Same file!',
+            messagebox.showerror(title='Same location!',
                                  message='Chosen destination is the same as original file location!')
             return
         if os.path.exists(potential_destination):
             question = messagebox.askyesno(title='File already exists!',
-                                           message='Do you wish to overwrite existing file?')
+                                           message='Do you wish to overwrite existing file with the same name?')
             if not question:
                 return
         shutil.copy(original_location, destination_location)
         now = datetime.now()
         current_time = now.strftime('%H:%M:%S')
+        self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
                                     f'[{current_time}] Copied file {copied_file_name} from '
                                     f'{original_location_name} to {destination_location}.\n\n')
         self.changelog_field.insert('0.0', 'COPY FILE operation:\n')
+        self.changelog_field.config(state=DISABLED)
 
     def delete_file(self):
         file_location = filedialog.askopenfilename(
@@ -106,10 +109,12 @@ class FileManager:
         deleted_file_location = os.path.split(file_location)[0]
         now = datetime.now()
         current_time = now.strftime('%H:%M:%S')
+        self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
                                     f'[{current_time}] Deleted file {deleted_file_name} from '
                                     f'{deleted_file_location}.\n\n')
         self.changelog_field.insert('0.0', 'DELETE FILE operation:\n')
+        self.changelog_field.config(state=DISABLED)
 
     def rename_file(self):
         file_location = filedialog.askopenfilename()
@@ -137,10 +142,47 @@ class FileManager:
         os.rename(file_location, renamed_file_location)
         now = datetime.now()
         current_time = now.strftime('%H:%M:%S')
+        self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
                                     f'[{current_time}] Renamed file {original_file} to '
                                     f'{new_filename + extension} inside {file_location_dir}.\n\n')
         self.changelog_field.insert('0.0', 'RENAME FILE operation:\n')
+        self.changelog_field.config(state=DISABLED)
+
+    def move_file(self):
+        original_location = filedialog.askopenfilename(
+            initialdir=os.getcwd(),
+            title="Select a file to move"
+        )
+        if not original_location:
+            return
+        moved_file_name = os.path.split(original_location)[1]
+        original_location_name = os.path.split(original_location)[0]
+
+        destination_location = filedialog.askdirectory(
+            title='Choose destination'
+        )
+        if not destination_location:
+            return
+        potential_destination = os.path.join(destination_location, moved_file_name)
+        if original_location_name == destination_location:
+            messagebox.showerror(title='Same location!',
+                                 message='Chosen destination is the same as original file location!')
+            return
+        if os.path.exists(potential_destination):
+            question = messagebox.askyesno(title='File already exists!',
+                                           message='Do you wish to overwrite existing file with the same name?')
+            if not question:
+                return
+        shutil.move(original_location, destination_location)
+        now = datetime.now()
+        current_time = now.strftime('%H:%M:%S')
+        self.changelog_field.config(state=NORMAL)
+        self.changelog_field.insert('0.0',
+                                    f'[{current_time}] Moved file {moved_file_name} from '
+                                    f'{original_location_name} to {destination_location}.\n\n')
+        self.changelog_field.insert('0.0', 'MOVE FILE operation:\n')
+        self.changelog_field.config(state=DISABLED)
 
 
 def main():
