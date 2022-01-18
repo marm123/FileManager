@@ -1,7 +1,7 @@
 from tkinter import *
 import os
 import shutil
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
 from datetime import datetime
 
 
@@ -26,9 +26,10 @@ class FileManager:
         self.frame_footer = ttk.Frame(master)
         self.frame_footer.grid(row=3, column=1)
 
-        ttk.Label(self.frame_header, text='This script will help you manage files on your computer.').pack(pady=20)
+        ttk.Label(self.frame_header, text='This script will help you manage files on your computer.').grid(row=0,
+                                                                                                           column=1)
         ttk.Label(self.frame_buttons, text='Choose your action:').grid(row=1, column=0, pady=(0, 25))
-        ttk.Label(self.frame_footer, text='by Bartosz Marmołowski', font=('Arial', 7)).pack()
+        ttk.Label(self.frame_footer, text='by Bartosz Marmołowski', font=('Arial', 7)).grid(row=0, column=0)
 
         self.changelog_field = Text(self.frame_changelog, width=70, height=10, font=('Arial', 7), wrap=WORD)
         self.changelog_field.grid(row=0, column=0, columnspan=2, padx=(5, 0), pady=5)
@@ -40,7 +41,7 @@ class FileManager:
         self.copy_file_button.grid(row=2)
         self.delete_file_button = ttk.Button(self.frame_buttons, text='Delete File', command=self.delete_file)
         self.delete_file_button.grid(row=3)
-        self.rename_file_button = ttk.Button(self.frame_buttons, text='Rename File')
+        self.rename_file_button = ttk.Button(self.frame_buttons, text='Rename File', command=self.rename_file)
         self.rename_file_button.grid(row=4)
         self.move_file_button = ttk.Button(self.frame_buttons, text='Move File')
         self.move_file_button.grid(row=5)
@@ -61,16 +62,20 @@ class FileManager:
             initialdir=os.getcwd(),
             title="Select a file to copy"
         )
-
+        if not original_location:
+            return
         copied_file_name = os.path.split(original_location)[1]
         original_location_name = os.path.split(original_location)[0]
 
         destination_location = filedialog.askdirectory(
             title='Choose destination'
         )
+        if not destination_location:
+            return
         potential_destination = os.path.join(destination_location, copied_file_name)
         if original_location_name == destination_location:
-            messagebox.showerror(title='Same file!', message='Chosen destination is the same as original file location!')
+            messagebox.showerror(title='Same file!',
+                                 message='Chosen destination is the same as original file location!')
             return
         if os.path.exists(potential_destination):
             question = messagebox.askyesno(title='File already exists!',
@@ -82,15 +87,18 @@ class FileManager:
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.insert('0.0',
                                     f'[{current_time}] Copied file {copied_file_name} from '
-                                    f'{original_location_name} to {destination_location}\n\n')
-        self.changelog_field.insert('0.0', 'COPY FILE operation\n')
+                                    f'{original_location_name} to {destination_location}.\n\n')
+        self.changelog_field.insert('0.0', 'COPY FILE operation:\n')
 
     def delete_file(self):
         file_location = filedialog.askopenfilename(
             initialdir=os.getcwd(),
             title="Select a file to delete"
         )
-        question = messagebox.askyesno(title='Confirmation required.', message='Are you sure you want to delete this file?')
+        if not file_location:
+            return
+        question = messagebox.askyesno(title='Confirmation required.',
+                                       message='Are you sure you want to delete this file?')
         if not question:
             return
         os.remove(file_location)
@@ -100,8 +108,39 @@ class FileManager:
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.insert('0.0',
                                     f'[{current_time}] Deleted file {deleted_file_name} from '
-                                    f'{deleted_file_location}\n\n')
-        self.changelog_field.insert('0.0', 'DELETE FILE operation\n')
+                                    f'{deleted_file_location}.\n\n')
+        self.changelog_field.insert('0.0', 'DELETE FILE operation:\n')
+
+    def rename_file(self):
+        file_location = filedialog.askopenfilename()
+        if not file_location:
+            return
+        file_location_dir = os.path.dirname(file_location)
+        extension = os.path.splitext(file_location)[1]
+        original_file = os.path.split(file_location)[1]
+        original_file_name = os.path.splitext(original_file)[0]
+        new_filename = simpledialog.askstring(title='New file name.', prompt='Enter new file name:')
+        if new_filename is None:
+            return
+        elif new_filename == '':
+            messagebox.showerror(title='File name error!', message='No new name was provided!')
+            return
+        elif original_file_name == new_filename:
+            messagebox.showerror(title='File name error!', message='New file name is the same as the original one!')
+            return
+        else:
+            question = messagebox.askyesno(title='Confirmation required.',
+                                           message=f'Are you sure you want to rename your file to \'{new_filename}\'?')
+            if not question:
+                return
+        renamed_file_location = os.path.join(file_location_dir, new_filename + extension)
+        os.rename(file_location, renamed_file_location)
+        now = datetime.now()
+        current_time = now.strftime('%H:%M:%S')
+        self.changelog_field.insert('0.0',
+                                    f'[{current_time}] Renamed file {original_file} to '
+                                    f'{new_filename + extension} inside {file_location_dir}.\n\n')
+        self.changelog_field.insert('0.0', 'RENAME FILE operation:\n')
 
 
 def main():
