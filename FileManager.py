@@ -69,6 +69,9 @@ class FileManager:
             title='Choose destination'
         )
         potential_destination = os.path.join(destination_location, copied_file_name)
+        if original_location_name == destination_location:
+            messagebox.showerror(title='Same file!', message='Chosen destination is the same as original file location!')
+            return
         if os.path.exists(potential_destination):
             question = messagebox.askyesno(title='File already exists!',
                                            message='Do you wish to overwrite existing file?')
@@ -79,7 +82,7 @@ class FileManager:
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.insert('0.0',
                                     f'[{current_time}] Copied file {copied_file_name} from '
-                                    f'{original_location_name} to {destination_location}\n')
+                                    f'{original_location_name} to {destination_location}\n\n')
         self.changelog_field.insert('0.0', 'COPY FILE operation\n')
 
     def delete_file(self):
@@ -97,7 +100,7 @@ class FileManager:
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.insert('0.0',
                                     f'[{current_time}] Deleted file {deleted_file_name} from '
-                                    f'{deleted_file_location}\n')
+                                    f'{deleted_file_location}\n\n')
         self.changelog_field.insert('0.0', 'DELETE FILE operation\n')
 
 
