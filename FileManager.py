@@ -38,7 +38,7 @@ class FileManager:
 
         self.copy_file_button = ttk.Button(self.frame_buttons, text='Copy File', command=self.copy_file)
         self.copy_file_button.grid(row=2)
-        self.delete_file_button = ttk.Button(self.frame_buttons, text='Delete File')
+        self.delete_file_button = ttk.Button(self.frame_buttons, text='Delete File', command=self.delete_file)
         self.delete_file_button.grid(row=3)
         self.rename_file_button = ttk.Button(self.frame_buttons, text='Rename File')
         self.rename_file_button.grid(row=4)
@@ -59,12 +59,15 @@ class FileManager:
     def copy_file(self):
         original_location = filedialog.askopenfilename(
             initialdir=os.getcwd(),
-            title="Please select a file:"
+            title="Select a file to copy"
         )
 
         copied_file_name = os.path.split(original_location)[1]
         original_location_name = os.path.split(original_location)[0]
-        destination_location = filedialog.askdirectory()
+
+        destination_location = filedialog.askdirectory(
+            title='Choose destination'
+        )
         potential_destination = os.path.join(destination_location, copied_file_name)
         if os.path.exists(potential_destination):
             question = messagebox.askyesno(title='File already exists!',
@@ -75,9 +78,27 @@ class FileManager:
         now = datetime.now()
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.insert('0.0',
-                                    f'[{current_time}] copied file {copied_file_name} from '
+                                    f'[{current_time}] Copied file {copied_file_name} from '
                                     f'{original_location_name} to {destination_location}\n')
         self.changelog_field.insert('0.0', 'COPY FILE operation\n')
+
+    def delete_file(self):
+        file_location = filedialog.askopenfilename(
+            initialdir=os.getcwd(),
+            title="Select a file to delete"
+        )
+        question = messagebox.askyesno(title='Confirmation required.', message='Are you sure you want to delete this file?')
+        if not question:
+            return
+        os.remove(file_location)
+        deleted_file_name = os.path.split(file_location)[1]
+        deleted_file_location = os.path.split(file_location)[0]
+        now = datetime.now()
+        current_time = now.strftime('%H:%M:%S')
+        self.changelog_field.insert('0.0',
+                                    f'[{current_time}] Deleted file {deleted_file_name} from '
+                                    f'{deleted_file_location}\n')
+        self.changelog_field.insert('0.0', 'DELETE FILE operation\n')
 
 
 def main():
