@@ -20,8 +20,8 @@ class FileManager:
         self.frame_buttons = ttk.Frame(master)
         self.frame_buttons.grid(row=2, column=0)
 
-        self.frame_files_list = ttk.Frame(master)
-        self.frame_files_list.grid(row=2, column=1)
+        self.frame_files_name_type = ttk.Frame(master)
+        self.frame_files_name_type.grid(row=2, column=1)
 
         self.frame_footer = ttk.Frame(master)
         self.frame_footer.grid(row=3, column=1)
@@ -39,24 +39,55 @@ class FileManager:
         self.changelog_field.config(state=DISABLED)
 
         self.copy_file_button = ttk.Button(self.frame_buttons, text='Copy File', command=self.copy_file)
-        self.copy_file_button.grid(row=2)
+        self.copy_file_button.grid(row=2, sticky='ew', padx=10)
         self.delete_file_button = ttk.Button(self.frame_buttons, text='Delete File', command=self.delete_file)
-        self.delete_file_button.grid(row=3)
+        self.delete_file_button.grid(row=3, sticky='ew', padx=10)
         self.rename_file_button = ttk.Button(self.frame_buttons, text='Rename File', command=self.rename_file)
-        self.rename_file_button.grid(row=4)
+        self.rename_file_button.grid(row=4, sticky='ew', padx=10)
         self.move_file_button = ttk.Button(self.frame_buttons, text='Move File', command=self.move_file)
-        self.move_file_button.grid(row=5)
+        self.move_file_button.grid(row=5, sticky='ew', padx=10)
         self.make_folder_button = ttk.Button(self.frame_buttons, text='Make Folder')
-        self.make_folder_button.grid(row=6)
+        self.make_folder_button.grid(row=6, sticky='ew', padx=10)
         self.copy_folder_button = ttk.Button(self.frame_buttons, text='Copy Folder')
-        self.copy_folder_button.grid(row=7)
+        self.copy_folder_button.grid(row=7, sticky='ew', padx=10)
         self.delete_folder_button = ttk.Button(self.frame_buttons, text='Delete Folder')
-        self.delete_folder_button.grid(row=8)
-        self.list_files_button = ttk.Button(self.frame_buttons, text='List all Files in Folder')
-        self.list_files_button.grid(row=9)
+        self.delete_folder_button.grid(row=8, sticky='ew', padx=10)
+        self.list_files_button = ttk.Button(self.frame_buttons, text='List all Files in Folder',
+                                            command=self.list_files_in_dir)
+        self.list_files_button.grid(row=9, sticky='ew', ipadx=10, padx=10)
 
-        self.files_list_field = Text(self.frame_files_list, width=25, height=20)
-        self.files_list_field.pack(padx=5, pady=5)
+        self.frame_file_list = Frame(self.frame_files_name_type)
+        self.frame_file_list.grid(row=0, column=0)
+        self.file_name_list_field = Text(self.frame_file_list, width=25, height=20, wrap=NONE, font=('Arial', 7))
+        self.file_name_list_field.grid(row=0, column=0)
+        self.file_name_list_field.config(state=DISABLED)
+
+        self.file_type_field = Text(self.frame_file_list, width=12, height=20, wrap=NONE, font=('Arial', 7))
+        self.file_type_field.grid(row=0, column=1)
+        self.file_type_field.config(state=DISABLED)
+
+        self.file_list_scrollbar = Scrollbar(self.frame_file_list)
+        self.file_list_scrollbar.grid(row=0, column=2, sticky='nsew')
+        self.file_list_scrollbar['command'] = self.scrollbar_func
+        self.file_name_list_field['yscrollcommand'] = self.text_scroll_func
+        self.file_type_field['yscrollcommand'] = self.text_scroll_func
+
+        self.file_name_scrollbar = Scrollbar(self.frame_file_list, orient='horizontal', command=self.file_name_list_field.xview)
+        self.file_name_scrollbar.grid(row=1, column=0, sticky='we')
+        self.file_name_list_field['xscrollcommand'] = self.file_name_scrollbar.set
+        self.file_type_scrollbar = Scrollbar(self.frame_file_list, orient='horizontal', command=self.file_type_field.xview)
+        self.file_type_scrollbar.grid(row=1, column=1, sticky='we')
+        self.file_type_field['xscrollcommand'] = self.file_type_scrollbar.set
+
+
+
+    def scrollbar_func(self, *args):
+        self.file_name_list_field.yview(*args)
+        self.file_type_field.yview(*args)
+
+    def text_scroll_func(self, *args):
+        self.file_list_scrollbar.set(*args)
+        self.scrollbar_func('moveto', args[0])
 
     def copy_file(self):
         original_location = filedialog.askopenfilename(
@@ -183,6 +214,29 @@ class FileManager:
                                     f'{original_location_name} to {destination_location}.\n\n')
         self.changelog_field.insert('0.0', 'MOVE FILE operation:\n')
         self.changelog_field.config(state=DISABLED)
+
+    def make_folder(self):
+        pass
+
+    def list_files_in_dir(self):
+        folderList = filedialog.askdirectory()
+        if not folderList:
+            return
+        self.file_name_list_field.config(state=NORMAL)
+        self.file_type_field.config(state=NORMAL)
+        self.file_name_list_field.delete(1.0, END)
+        self.file_type_field.delete(1.0, END)
+        for file in os.listdir(folderList):
+            file_name = os.path.splitext(file)[0]
+            file_type = os.path.splitext(file)[1]
+            self.file_name_list_field.insert(END, file_name + '\n')
+            if file_type == '':
+                self.file_type_field.insert(END, 'folder' + '\n')
+            else:
+                self.file_type_field.insert(END, file_type + '\n')
+        self.file_name_list_field.config(state=DISABLED)
+        self.file_type_field.config(state=DISABLED)
+
 
 
 def main():
