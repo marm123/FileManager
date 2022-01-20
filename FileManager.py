@@ -24,12 +24,12 @@ class FileManager:
         self.frame_files_name_type.grid(row=2, column=1)
 
         self.frame_footer = ttk.Frame(master)
-        self.frame_footer.grid(row=3, column=1)
+        self.frame_footer.grid(row=3, column=1, columnspan=2)
 
         ttk.Label(self.frame_header, text='This script will help you manage files on your computer.').grid(row=0,
                                                                                                            column=1)
-        ttk.Label(self.frame_buttons, text='Choose your action:').grid(row=1, column=0, pady=(0, 25))
-        ttk.Label(self.frame_footer, text='by Bartosz Marmołowski', font=('Arial', 7)).grid(row=0, column=0)
+        ttk.Label(self.frame_buttons, text='Choose your action:').grid(row=1, column=0, pady=(0, 15))
+        ttk.Label(self.frame_footer, text='\t\tby Bartosz Marmołowski', font=('Arial', 7)).grid(row=0, column=1)
 
         self.changelog_field = Text(self.frame_changelog, width=70, height=10, font=('Arial', 7), wrap=WORD)
         self.changelog_field.grid(row=0, column=0, columnspan=2, padx=(5, 0), pady=5)
@@ -46,7 +46,7 @@ class FileManager:
         self.rename_file_button.grid(row=4, sticky='ew', padx=10)
         self.move_file_button = ttk.Button(self.frame_buttons, text='Move File', command=self.move_file)
         self.move_file_button.grid(row=5, sticky='ew', padx=10)
-        self.make_folder_button = ttk.Button(self.frame_buttons, text='Make Folder')
+        self.make_folder_button = ttk.Button(self.frame_buttons, text='Create Folder', command=self.create_folder)
         self.make_folder_button.grid(row=6, sticky='ew', padx=10)
         self.copy_folder_button = ttk.Button(self.frame_buttons, text='Copy Folder')
         self.copy_folder_button.grid(row=7, sticky='ew', padx=10)
@@ -55,31 +55,33 @@ class FileManager:
         self.list_files_button = ttk.Button(self.frame_buttons, text='List all Files in Folder',
                                             command=self.list_files_in_dir)
         self.list_files_button.grid(row=9, sticky='ew', ipadx=10, padx=10)
+        self.list_files_button = ttk.Button(self.frame_buttons, text='Export Actions Log')
+        self.list_files_button.grid(row=10, sticky='ew', ipadx=10, padx=10)
 
         self.frame_file_list = Frame(self.frame_files_name_type)
-        self.frame_file_list.grid(row=0, column=0)
-        self.file_name_list_field = Text(self.frame_file_list, width=25, height=20, wrap=NONE, font=('Arial', 7))
-        self.file_name_list_field.grid(row=0, column=0)
+        self.frame_file_list.grid(row=1, column=0)
+        self.file_name_list_field = Text(self.frame_file_list, width=25, height=25, wrap=NONE, font=('Arial', 7))
+        self.file_name_list_field.grid(row=1, column=0)
         self.file_name_list_field.config(state=DISABLED)
 
-        self.file_type_field = Text(self.frame_file_list, width=12, height=20, wrap=NONE, font=('Arial', 7))
-        self.file_type_field.grid(row=0, column=1)
+        self.file_type_field = Text(self.frame_file_list, width=12, height=25, wrap=NONE, font=('Arial', 7))
+        self.file_type_field.grid(row=1, column=1)
         self.file_type_field.config(state=DISABLED)
 
         self.file_list_scrollbar = Scrollbar(self.frame_file_list)
-        self.file_list_scrollbar.grid(row=0, column=2, sticky='nsew')
+        self.file_list_scrollbar.grid(row=1, column=2, sticky='nsew')
         self.file_list_scrollbar['command'] = self.scrollbar_func
         self.file_name_list_field['yscrollcommand'] = self.text_scroll_func
         self.file_type_field['yscrollcommand'] = self.text_scroll_func
 
-        self.file_name_scrollbar = Scrollbar(self.frame_file_list, orient='horizontal', command=self.file_name_list_field.xview)
-        self.file_name_scrollbar.grid(row=1, column=0, sticky='we')
+        self.file_name_scrollbar = Scrollbar(self.frame_file_list, orient='horizontal',
+                                             command=self.file_name_list_field.xview)
+        self.file_name_scrollbar.grid(row=2, column=0, sticky='we')
         self.file_name_list_field['xscrollcommand'] = self.file_name_scrollbar.set
-        self.file_type_scrollbar = Scrollbar(self.frame_file_list, orient='horizontal', command=self.file_type_field.xview)
-        self.file_type_scrollbar.grid(row=1, column=1, sticky='we')
+        self.file_type_scrollbar = Scrollbar(self.frame_file_list, orient='horizontal',
+                                             command=self.file_type_field.xview)
+        self.file_type_scrollbar.grid(row=2, column=1, sticky='we')
         self.file_type_field['xscrollcommand'] = self.file_type_scrollbar.set
-
-
 
     def scrollbar_func(self, *args):
         self.file_name_list_field.yview(*args)
@@ -115,6 +117,7 @@ class FileManager:
             if not question:
                 return
         shutil.copy(original_location, destination_location)
+        messagebox.showinfo(title='File copied.', message='File copied successfully!')
         now = datetime.now()
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
@@ -136,6 +139,7 @@ class FileManager:
         if not question:
             return
         os.remove(file_location)
+        messagebox.showinfo(title='File deleted.', message='File deleted successfully!')
         deleted_file_name = os.path.split(file_location)[1]
         deleted_file_location = os.path.split(file_location)[0]
         now = datetime.now()
@@ -171,6 +175,7 @@ class FileManager:
                 return
         renamed_file_location = os.path.join(file_location_dir, new_filename + extension)
         os.rename(file_location, renamed_file_location)
+        messagebox.showinfo(title='File renamed.', message='File renamed successfully!')
         now = datetime.now()
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
@@ -206,6 +211,7 @@ class FileManager:
             if not question:
                 return
         shutil.move(original_location, destination_location)
+        messagebox.showinfo(title='File moved.', message='File moved successfully!')
         now = datetime.now()
         current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
@@ -215,8 +221,26 @@ class FileManager:
         self.changelog_field.insert('0.0', 'MOVE FILE operation:\n')
         self.changelog_field.config(state=DISABLED)
 
-    def make_folder(self):
-        pass
+    def create_folder(self):
+        new_folder_location = filedialog.askdirectory()
+        if not new_folder_location:
+            return
+        new_folder_name = simpledialog.askstring(title='Folder name.',
+                                                 prompt='Enter folder name that you would like to create:')
+        new_folder = os.path.join(new_folder_location, new_folder_name)
+        if os.path.exists(new_folder):
+            messagebox.showerror(title='Folder exists!', message=f'Folder with that name already exists in {new_folder_location}')
+        else:
+            os.mkdir(new_folder)
+            messagebox.showinfo(title='Folder created.', message='Folder created successfully!')
+        now = datetime.now()
+        current_time = now.strftime('%H:%M:%S')
+        self.changelog_field.config(state=NORMAL)
+        self.changelog_field.insert('0.0',
+                                    f'[{current_time}] Created folder {new_folder_name} in '
+                                    f'{new_folder_location}.\n\n')
+        self.changelog_field.insert('0.0', 'CREATE FOLDER operation:\n')
+        self.changelog_field.config(state=DISABLED)
 
     def list_files_in_dir(self):
         folderList = filedialog.askdirectory()
@@ -236,7 +260,6 @@ class FileManager:
                 self.file_type_field.insert(END, file_type + '\n')
         self.file_name_list_field.config(state=DISABLED)
         self.file_type_field.config(state=DISABLED)
-
 
 
 def main():
