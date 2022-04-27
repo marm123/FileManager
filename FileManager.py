@@ -1,3 +1,4 @@
+from distutils.dir_util import copy_tree
 from tkinter import *
 import os
 import shutil
@@ -48,7 +49,7 @@ class FileManager:
         self.move_file_button.grid(row=5, sticky='ew', padx=10)
         self.make_folder_button = ttk.Button(self.frame_buttons, text='Create Folder', command=self.create_folder)
         self.make_folder_button.grid(row=6, sticky='ew', padx=10)
-        self.copy_folder_button = ttk.Button(self.frame_buttons, text='Copy Folder')
+        self.copy_folder_button = ttk.Button(self.frame_buttons, text='Copy Folder', command=self.copy_folder)
         self.copy_folder_button.grid(row=7, sticky='ew', padx=10)
         self.delete_folder_button = ttk.Button(self.frame_buttons, text='Delete Folder')
         self.delete_folder_button.grid(row=8, sticky='ew', padx=10)
@@ -229,7 +230,8 @@ class FileManager:
                                                  prompt='Enter folder name that you would like to create:')
         new_folder = os.path.join(new_folder_location, new_folder_name)
         if os.path.exists(new_folder):
-            messagebox.showerror(title='Folder exists!', message=f'Folder with that name already exists in {new_folder_location}')
+            messagebox.showerror(title='Folder exists!',
+                                 message=f'Folder with that name already exists in {new_folder_location}')
         else:
             os.mkdir(new_folder)
             messagebox.showinfo(title='Folder created.', message='Folder created successfully!')
@@ -241,6 +243,22 @@ class FileManager:
                                     f'{new_folder_location}.\n\n')
         self.changelog_field.insert('0.0', 'CREATE FOLDER operation:\n')
         self.changelog_field.config(state=DISABLED)
+
+    def copy_folder(self):
+        folder_to_copy = filedialog.askdirectory()
+        if not folder_to_copy:
+            return
+        folder_destination = filedialog.askdirectory()
+        if not folder_destination:
+            return
+        try:
+            folder_destination_name = os.path.join(folder_destination, os.path.basename(folder_to_copy))
+            os.mkdir(folder_destination_name)
+            copy_tree(folder_to_copy, folder_destination_name)
+        except FileExistsError:
+            folder_destination_name = os.path.join(folder_destination, os.path.basename(folder_to_copy + ' - copy'))
+            os.mkdir(folder_destination_name)
+            copy_tree(folder_to_copy, folder_destination_name)
 
     def list_files_in_dir(self):
         folderList = filedialog.askdirectory()
