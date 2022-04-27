@@ -119,11 +119,9 @@ class FileManager:
                 return
         shutil.copy(original_location, destination_location)
         messagebox.showinfo(title='File copied.', message='File copied successfully!')
-        now = datetime.now()
-        current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
-                                    f'[{current_time}] Copied file {copied_file_name} from '
+                                    f'[{self.current_time}] Copied file {copied_file_name} from '
                                     f'{original_location_name} to {destination_location}.\n\n')
         self.changelog_field.insert('0.0', 'COPY FILE operation:\n')
         self.changelog_field.config(state=DISABLED)
@@ -143,11 +141,9 @@ class FileManager:
         messagebox.showinfo(title='File deleted.', message='File deleted successfully!')
         deleted_file_name = os.path.split(file_location)[1]
         deleted_file_location = os.path.split(file_location)[0]
-        now = datetime.now()
-        current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
-                                    f'[{current_time}] Deleted file {deleted_file_name} from '
+                                    f'[{self.current_time}] Deleted file {deleted_file_name} from '
                                     f'{deleted_file_location}.\n\n')
         self.changelog_field.insert('0.0', 'DELETE FILE operation:\n')
         self.changelog_field.config(state=DISABLED)
@@ -177,11 +173,9 @@ class FileManager:
         renamed_file_location = os.path.join(file_location_dir, new_filename + extension)
         os.rename(file_location, renamed_file_location)
         messagebox.showinfo(title='File renamed.', message='File renamed successfully!')
-        now = datetime.now()
-        current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
-                                    f'[{current_time}] Renamed file {original_file} to '
+                                    f'[{self.current_time}] Renamed file {original_file} to '
                                     f'{new_filename + extension} inside {file_location_dir}.\n\n')
         self.changelog_field.insert('0.0', 'RENAME FILE operation:\n')
         self.changelog_field.config(state=DISABLED)
@@ -213,11 +207,9 @@ class FileManager:
                 return
         shutil.move(original_location, destination_location)
         messagebox.showinfo(title='File moved.', message='File moved successfully!')
-        now = datetime.now()
-        current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
-                                    f'[{current_time}] Moved file {moved_file_name} from '
+                                    f'[{self.current_time}] Moved file {moved_file_name} from '
                                     f'{original_location_name} to {destination_location}.\n\n')
         self.changelog_field.insert('0.0', 'MOVE FILE operation:\n')
         self.changelog_field.config(state=DISABLED)
@@ -235,11 +227,9 @@ class FileManager:
         else:
             os.mkdir(new_folder)
             messagebox.showinfo(title='Folder created.', message='Folder created successfully!')
-        now = datetime.now()
-        current_time = now.strftime('%H:%M:%S')
         self.changelog_field.config(state=NORMAL)
         self.changelog_field.insert('0.0',
-                                    f'[{current_time}] Created folder {new_folder_name} in '
+                                    f'[{self.current_time}] Created folder {new_folder_name} in '
                                     f'{new_folder_location}.\n\n')
         self.changelog_field.insert('0.0', 'CREATE FOLDER operation:\n')
         self.changelog_field.config(state=DISABLED)
@@ -251,28 +241,20 @@ class FileManager:
         folder_destination = filedialog.askdirectory()
         if not folder_destination:
             return
-        now = datetime.now()
-        current_time = now.strftime('%H:%M:%S')
         try:
             folder_destination_name = os.path.join(folder_destination, os.path.basename(folder_to_copy))
             os.mkdir(folder_destination_name)
             copy_tree(folder_to_copy, folder_destination_name)
-            self.changelog_field.config(state=NORMAL)
-            self.changelog_field.insert('0.0',
-                                        f'[{current_time}] Copied folder {folder_to_copy} into '
-                                        f'{folder_destination}.\n\n')
-            self.changelog_field.insert('0.0', 'COPY FOLDER operation:\n')
-            self.changelog_field.config(state=DISABLED)
         except FileExistsError:
             folder_destination_name = os.path.join(folder_destination, os.path.basename(folder_to_copy + ' - copy'))
             os.mkdir(folder_destination_name)
             copy_tree(folder_to_copy, folder_destination_name)
-            self.changelog_field.config(state=NORMAL)
-            self.changelog_field.insert('0.0',
-                                        f'[{current_time}] Copied folder {folder_to_copy} into '
-                                        f'{folder_destination}.\n\n')
-            self.changelog_field.insert('0.0', 'COPY FOLDER operation:\n')
-            self.changelog_field.config(state=DISABLED)
+        self.changelog_field.config(state=NORMAL)
+        self.changelog_field.insert('0.0',
+                                    f'[{self.current_time}] Copied folder {folder_to_copy} into '
+                                    f'{folder_destination}.\n\n')
+        self.changelog_field.insert('0.0', 'COPY FOLDER operation:\n')
+        self.changelog_field.config(state=DISABLED)
 
     def list_files_in_dir(self):
         folderList = filedialog.askdirectory()
