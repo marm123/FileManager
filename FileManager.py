@@ -251,14 +251,28 @@ class FileManager:
         folder_destination = filedialog.askdirectory()
         if not folder_destination:
             return
+        now = datetime.now()
+        current_time = now.strftime('%H:%M:%S')
         try:
             folder_destination_name = os.path.join(folder_destination, os.path.basename(folder_to_copy))
             os.mkdir(folder_destination_name)
             copy_tree(folder_to_copy, folder_destination_name)
+            self.changelog_field.config(state=NORMAL)
+            self.changelog_field.insert('0.0',
+                                        f'[{current_time}] Copied folder {folder_to_copy} into '
+                                        f'{folder_destination}.\n\n')
+            self.changelog_field.insert('0.0', 'COPY FOLDER operation:\n')
+            self.changelog_field.config(state=DISABLED)
         except FileExistsError:
             folder_destination_name = os.path.join(folder_destination, os.path.basename(folder_to_copy + ' - copy'))
             os.mkdir(folder_destination_name)
             copy_tree(folder_to_copy, folder_destination_name)
+            self.changelog_field.config(state=NORMAL)
+            self.changelog_field.insert('0.0',
+                                        f'[{current_time}] Copied folder {folder_to_copy} into '
+                                        f'{folder_destination}.\n\n')
+            self.changelog_field.insert('0.0', 'COPY FOLDER operation:\n')
+            self.changelog_field.config(state=DISABLED)
 
     def list_files_in_dir(self):
         folderList = filedialog.askdirectory()
